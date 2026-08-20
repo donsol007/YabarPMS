@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="0gjOGsS17bYA3mvDMfpuVfSixix41jyqRjVWjXUI">
+
+        <title>Yabar Finance Consult Limited</title>
+
+        <link rel="icon" type="image/x-icon" href="http://127.0.0.1:8002/favicon.ico">
+
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+
+        <link rel="preload" as="style" href="http://127.0.0.1:8002/build/assets/app-mbVleRL0.css" /><link rel="modulepreload" as="script" href="http://127.0.0.1:8002/build/assets/app-Cc9pec4W.js" /><link rel="stylesheet" href="http://127.0.0.1:8002/build/assets/app-mbVleRL0.css" data-navigate-track="reload" /><script type="module" src="http://127.0.0.1:8002/build/assets/app-Cc9pec4W.js" data-navigate-track="reload"></script>        <!-- Livewire Styles --><style >[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.list-item][wire\:loading\.list-item], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {display: none;}[wire\:offline][wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}:root {--livewire-progress-bar-color: #2299dd;}[x-cloak] {display: none !important;}[wire\:cloak] {display: none !important;}dialog#livewire-error::backdrop {background-color: rgba(0, 0, 0, .6);}</style>
+    </head>
+    <body class="font-sans antialiased">
+        <div class="flex min-h-screen items-center justify-center bg-slate-100 dark:bg-slate-950 px-4 py-12">
+            <div class="w-full max-w-md">
+                <div class="mb-6 flex flex-col items-center">
+                                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-2xl font-bold text-white shadow-lg shadow-brand-600/30">Y</div>
+                                        <h1 class="mt-4 text-xl font-bold text-slate-900 dark:text-white">Yabar Finance Consult Limited</h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Investment Client Portfolio Management</p>
+                </div>
+
+                <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-xl border border-slate-200 dark:border-slate-800">
+                    <div wire:snapshot="{&quot;data&quot;:{&quot;form&quot;:[{&quot;email&quot;:&quot;&quot;,&quot;password&quot;:&quot;&quot;,&quot;remember&quot;:false},{&quot;class&quot;:&quot;App\\Livewire\\Forms\\LoginForm&quot;,&quot;s&quot;:&quot;form&quot;}],&quot;showPassword&quot;:false},&quot;memo&quot;:{&quot;id&quot;:&quot;AeXThPe1Uz40VXCegypB&quot;,&quot;name&quot;:&quot;pages.auth.login&quot;,&quot;path&quot;:&quot;login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;en&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;1de63dc011a4bdf7ca9643da1f5b9c5d5f17ac3d5359879be3858dcbb51859ea&quot;}" wire:effects="[]" wire:id="AeXThPe1Uz40VXCegypB" wire:name="pages.auth.login">
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+    <form wire:submit="login" class="space-y-5">
+        <div class="text-center">
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">Sign in to your account</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Enter your credentials to continue</p>
+        </div>
+
+        <!-- Email Address -->
+        <div>
+            <label class="block font-medium text-sm text-gray-700" for="email">
+    Email
+</label>
+            <input  class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full" wire:model="form.email" id="email" type="email" name="email" required="required" autofocus="autofocus" autocomplete="username">
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <!-- Password -->
+        <div>
+            <label class="block font-medium text-sm text-gray-700" for="password">
+    Password
+</label>
+
+            <div class="relative">
+                <input  class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full pr-11" wire:model="form.password" id="password" type="password" name="password" required="required" autocomplete="current-password">
+
+                <button type="button" wire:click="togglePassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300" aria-label="Toggle password visibility">
+                    <svg x-data="{ visible: window.Livewire.find('AeXThPe1Uz40VXCegypB').entangle('showPassword') }" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path x-show="!visible" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path x-show="!visible" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <path x-show="visible" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                </button>
+            </div>
+
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <!-- Remember Me -->
+        <div class="flex items-center justify-between">
+            <label for="remember" class="inline-flex items-center">
+                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500" name="remember">
+                <span class="ms-2 text-sm text-gray-600 dark:text-gray-300">Remember me</span>
+            </label>
+
+            <!--[if BLOCK]><![endif]-->                <a class="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500" href="http://127.0.0.1:8002/forgot-password" wire:navigate>
+                    Forgot your password?
+                </a>
+            <!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <button type="submit" class="btn-primary w-full py-2.5" wire:loading.attr="disabled" wire:target="login">
+            <span wire:loading.remove wire:target="login">Log in</span>
+            <span wire:loading wire:target="login" class="inline-flex items-center gap-2">
+                <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Signing in…
+            </span>
+        </button>
+    </form>
+</div>
+                </div>
+
+                <p class="mt-6 text-center text-xs text-slate-400 dark:text-slate-500">
+                    © 2026 Yabar Finance Consult Limited
+                </p>
+            </div>
+        </div>
+
+        <!-- Livewire Scripts -->
+<script src="http://127.0.0.1:8002/livewire-1b2acb89/livewire.js?id=26bbdf42"   data-csrf="0gjOGsS17bYA3mvDMfpuVfSixix41jyqRjVWjXUI" data-module-url="http://127.0.0.1:8002/livewire-1b2acb89" data-update-uri="http://127.0.0.1:8002/livewire-1b2acb89/update" data-navigate-once="true"></script>
+    </body>
+</html>

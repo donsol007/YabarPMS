@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply antialiased bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="month"]::-webkit-calendar-picker-indicator,
+    input[type="week"]::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        filter: invert(100%) sepia(100%) saturate(900%) hue-rotate(342deg) brightness(45%) contrast(45%);
+    }
+}
+
+@layer components {
+    .card {
+        @apply bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm;
+    }
+
+    .card-header {
+        @apply px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4;
+    }
+
+    .card-body {
+        @apply p-5;
+    }
+
+    .card-footer {
+        @apply rounded-b-xl bg-slate-50/70 dark:bg-slate-900/40;
+    }
+
+    .input {
+        @apply w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm;
+    }
+
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 disabled:opacity-60 disabled:cursor-not-allowed;
+    }
+
+    .btn-primary {
+        @apply btn bg-brand-600 hover:bg-brand-700 text-white focus:ring-brand-500;
+    }
+
+    .btn-secondary {
+        @apply btn bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 focus:ring-slate-400;
+    }
+
+    .btn-danger {
+        @apply btn bg-red-600 hover:bg-red-700 text-white focus:ring-red-500;
+    }
+
+    .btn-ghost {
+        @apply btn text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:ring-slate-400;
+    }
+
+    .btn-sm {
+        @apply px-2.5 py-1.5 text-xs;
+    }
+
+    .label {
+        @apply block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5;
+    }
+
+    .badge {
+        @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    }
+}

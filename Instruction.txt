@@ -1,0 +1,247 @@
+Project Overview
+Build a modern, production-ready full-stack web application using Laravl for an Investment Client Portfolio Management System.
+The application should follow enterprise software development best practices with a clean architecture, responsive UI, secure authentication and scalable database design.
+
+Authentication
+The application must include:
+Login Page
+Fields
+•	Email
+•	Password
+Features
+•	Authentication
+•	Remember Me
+•	Forgot Password
+•	Show/Hide Password
+•	Loading Spinner
+•	Validation
+•	Redirect to Dashboard after login
+
+Staff Signup Page
+This page will not be public, only admin can register staff
+Fields
+•	Full Name
+•	Email
+•	Phone Number
+•	Password
+•	Confirm Password
+Features
+•	Password Strength Validation
+•	Duplicate Email Prevention
+•	Auto Login after successful registration
+
+Dashboard
+After login, users should see a professional dashboard with:
+Left Sidebar Menu
+•	Dashboard
+•	Client Portfolio
+•	Client Information
+•	Reports
+•	Profile
+•	Settings
+•	Logout
+Top Navigation should include:
+•	User Profile
+•	Notifications
+•	Dark Mode Toggle
+Dashboard cards should display:
+•	Total Clients
+•	Total Investment
+•	Total Active Portfolios
+•	Recent Registrations
+Include charts for:
+•	Investment Distribution
+•	Portfolio Performance
+•	Monthly Investments
+
+Client Information Module
+Create a complete registration form with validation.
+Personal Information
+•	ID (Auto Generated)
+•	Surname (mandatory)
+•	First Name(mandatory)
+•	Middle Name (mandatory)
+•	Sex (mandatory)
+•	Date of Birth (mandatory)
+•	Mobile Number (mandatory)
+•	Mother’s Maiden Name
+•	Residential Address
+•	State of Origin
+•	Local Government Area (LGA)
+•	Marital Status
+•	Religion
+•	Email Address (mandatory)
+
+Investment Information
+•	Amount to Invest
+
+Banking Information
+•	Bank Name
+•	Account Name
+•	Account Number
+•	Account Type
+•	BVN
+•	Date of Account Opening
+•	Bank Address
+
+Employment Information
+•	Occupation
+•	Employer’s Name
+•	Employer’s Address
+
+Personal Information
+•	Hobbies
+
+Next of Kin
+•	Next Kin Name
+•	Next Kin Address
+•	Next Kin Phone Number
+•	Next Kin Relationship
+•	Next Kin Email Address
+
+Document Uploads
+Allow upload of:
+•	ID Card
+•	Utility Bill
+•	Signature
+Requirements
+•	Drag-and-drop upload
+•	File preview
+•	PDF support
+•	Image support
+•	Maximum file size validation
+
+Client Portfolio Module
+The Client Portfolio page will be in two version, one for admin and another one for staff, the staff version will show all client portfolio in a list and staff will only be able to view their portfolio details. But for admin,  admin will be able to create new portfolio and Edit  and Delete portfolio, details as described below:
+•	Client Name(this will be at the top it will be a select button who’s data is populated from client name field in “Client information” module
+Then portfolio details are divided into three part.
+1. Fixed Debt Instrument: 
+Make it like a table columns
+Fields:
+•	Description
+•	Amount
+•	Status
+Actions:
+•	View
+•	Edit
+•	Delete
+•	Print
+•	Export PDF
+
+a. Payment Details:
+For each fixed debt instrument there will be details of the portfolio as explained below:-
+Fixed debt instrument details: Add ability to add, remove or edit any instrument details: 
+It will go with header; the header will be a select button with data from “Description” field from Fixed debt instrument section.
+Details fields:
+•	Subscription Date
+•	Instrument (Default data “CP”)
+•	Tenor
+•	Rental Rate
+•	Settlement date
+
+Subheading (Payment Breakdown)
+Make it like a table columns
+Field: 
+•	ROI
+•	Amount
+•	Payment Date
+•	Status (Options: Paid, Unpaid, Blank. Default is Blank (empty))
+Status badges:
+•	Paid
+•	Pending
+•	Not due
+Actions:
+•	View
+•	Edit
+•	Delete
+
+2. Payment History: Add ability to add, remove or edit any equity details
+Make it like a table columns
+Fields:
+•	Date
+•	Amount Paid
+•	Payment Status
+Actions:
+•	View
+•	Edit
+•	Delete
+
+3. Equity: Add ability to add, remove or edit any equity details
+Make it like a table columns.
+Fields:
+•	Stock
+•	Unit
+•	Price
+•	Value (unit * price)
+Actions:
+•	View
+•	Edit
+•	Delete
+
+When viewing each client portfolio, the following is expected (For both staff and admin)
+Portfolio Summary
+•	Total Fixed Debt
+•	Total Equity Value
+•	Total Portfolio Value = Total Fixed Debt + Total Equity Value
+
+
+Fixed Debt Investments
+In Table columns details of all fixed debt instruments.
+
+Reports
+Generate downloadable:
+•	Portfolio Report (it will show list of all portfolio, then a selected portfolio can be generated and downloaded) 
+•	Client Report(Show all like a list, user should be able to choose which field to appear)
+Export formats
+•	PDF
+
+Search
+Global search should search by:
+•	Client Name
+•	Phone Number
+•	Email
+•	Account Number
+•	Investment Type
+
+Database Design
+Create normalized models for:
+•	Users
+•	Clients
+•	Client Information
+•	Portfolios
+•	Payments
+•	ROI Schedule
+•	Banks
+•	Next of Kin
+•	Documents
+•	Reports
+Use proper ForeignKey relationships.
+
+Security
+Implement
+•	 Authentication
+•	Role-Based Access Control (Admin, Staff)
+•	CSRF Protection
+•	Input Validation
+•	File Upload Validation
+•	Secure Password Hashing
+•	Rate Limiting
+•	Audit Logging
+
+UI/UX Requirements
+Use a modern professional admin dashboard.
+Features
+•	Responsive Design
+•	Mobile Friendly
+•	Professional Color Theme
+•	Sidebar Navigation
+•	Breadcrumb Navigation
+•	Pagination
+•	Sorting
+•	Search
+•	Toast Notifications
+•	Confirmation Dialogs
+•	Loading Skeletons
+•	Empty State Screens
+•	Error Pages (404, 500)
+
