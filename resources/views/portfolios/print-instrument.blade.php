@@ -29,6 +29,12 @@
             <a href="{{ route('portfolios.instruments.pdf', [$portfolio, $instrument]) }}" style="margin-left:8px;padding:8px 16px;background:#fff;color:#EB721E;border:1px solid #EB721E;border-radius:6px;text-decoration:none;font-weight:600;">Export PDF</a>
         </div>
 
+        @if ($report_logo)
+            <div style="text-align:center; margin-bottom:12px;">
+                <img src="{{ $report_logo }}" alt="logo" style="height:56px;" />
+            </div>
+        @endif
+
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div>
                 <h1>{{ $company }}</h1>

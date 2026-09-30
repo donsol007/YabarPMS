@@ -35,6 +35,10 @@ new class extends Component
             'phone' => ['nullable', 'string', 'max:30'],
         ]);
 
+        if (! app()->hasDebugModeEnabled()) {
+            $validated['email'] = $user->email;
+        }
+
         $user->fill($validated);
 
         if ($user->isDirty('email')) {
@@ -85,7 +89,7 @@ new class extends Component
 
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" name="email" type="email" class="mt-1 block w-full" required autocomplete="username" />
+            <x-text-input wire:model="email" id="email" name="email" type="email" class="mt-1 block w-full" required autocomplete="username" :disabled="! app()->hasDebugModeEnabled()" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
         </div>
 

@@ -72,6 +72,19 @@
                         <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">PNG, ICO or SVG. Recommended 32×32. Max 512KB.</p>
                         <x-input-error :messages="$errors->get('company_favicon')" class="mt-2" />
                     </div>
+
+                    <div x-data="{ preview: @js(setting('report_logo') ? asset('storage/'.setting('report_logo')) : '') }">
+                        <x-input-label for="report_logo" :value="__('Report Logo')" />
+                        <div class="mt-1 flex h-24 items-center justify-center rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 overflow-hidden">
+                            <img x-show="preview" :src="preview" alt="Report logo" x-cloak class="max-h-full max-w-full object-contain p-2" />
+                            <span x-show="!preview" class="text-xs text-slate-400">No logo uploaded</span>
+                        </div>
+                        <input id="report_logo" type="file" name="report_logo" accept=".png,.jpg,.jpeg,.svg,.webp"
+                               class="mt-2 block w-full text-sm text-slate-600 dark:text-slate-300 file:mr-3 file:rounded-md file:border-0 file:bg-brand-50 dark:file:bg-brand-900/40 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-brand-700 dark:file:text-brand-300 hover:file:bg-brand-100 dark:hover:file:bg-brand-900/60"
+                               x-on:change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : ''">
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Shown on all generated reports. Falls back to the company logo if empty. PNG, JPG, SVG or WebP. Max 2MB.</p>
+                        <x-input-error :messages="$errors->get('report_logo')" class="mt-2" />
+                    </div>
                 </div>
             </div>
         </div>

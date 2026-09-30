@@ -57,20 +57,6 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
-    window.Alpine.data('lgaDropdown', (initialState, initialLga, lgasByState) => ({
-        lgas: [],
-
-        init() {
-            if (initialState && lgasByState[initialState]) {
-                this.lgas = lgasByState[initialState];
-            }
-        },
-
-        onStateChange(stateId) {
-            this.lgas = (stateId && lgasByState[stateId]) ? lgasByState[stateId] : [];
-        },
-    }));
-
     window.Alpine.data('fileDrop', () => ({
         dragging: false,
 

@@ -1,9 +1,12 @@
 <?php
 
+use App\Livewire\ClientIndex;
 use App\Models\Client;
+use App\Models\ClientRegistrationInvite;
 use App\Models\User;
 use App\Notifications\ClientRegisteredNotification;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 function guestRegistrationPayload(array $overrides = []): array
@@ -19,31 +22,57 @@ function guestRegistrationPayload(array $overrides = []): array
     ], $overrides);
 }
 
-test('guests can access the client registration page', function () {
-    $this->get('/client/register')
-        ->assertOk()
-        ->assertSee('Register as a Client');
-});
+function registrationInvite(array $overrides = []): ClientRegistrationInvite
+{
+    return ClientRegistrationInvite::create(array_merge([
+        'token' => Str::random(40),
+        'expires_at' => now()->addDay(),
+        'used_at' => null,
+    ], $overrides));
+}
 
-test('authenticated users are redirected away from the registration page', function () {
-    $this->actingAs(adminUser())
-        ->get('/client/register')
-        ->assertStatus(302);
-});
-
-test('a guest can register themselves as a client', function () {
-    Notification::fake();
-    $user = User::factory()->create();
-
-    Livewire::test('pages.auth.client-register')
+function guestRegistrationComponent(ClientRegistrationInvite $invite)
+{
+    return Livewire::test('pages.auth.client-register', ['token' => $invite->token])
         ->set('surname', 'Doe')
         ->set('first_name', 'Jane')
         ->set('middle_name', 'Obi')
         ->set('sex', 'Female')
         ->set('date_of_birth', '1992-05-10')
         ->set('mobile_number', '08011112222')
-        ->set('email', 'jane.doe@example.com')
+        ->set('email', 'jane.doe@example.com');
+}
+
+test('guests can access the client registration page with a valid share link', function () {
+    $invite = registrationInvite();
+
+    $this->get("/client/register/{$invite->token}")
+        ->assertOk()
+        ->assertSee('Register as a Client');
+});
+
+test('guests cannot access the registration page without a valid share link', function () {
+    $this->get('/client/register/invalid-token')
+        ->assertOk()
+        ->assertSee('Link Unavailable');
+});
+
+test('authenticated users are redirected away from the registration page', function () {
+    $invite = registrationInvite();
+
+    $this->actingAs(adminUser())
+        ->get("/client/register/{$invite->token}")
+        ->assertStatus(302);
+});
+
+test('a guest can register themselves as a client through a share link', function () {
+    Notification::fake();
+    $user = User::factory()->create();
+    $invite = registrationInvite(['created_by' => $user->id]);
+
+    guestRegistrationComponent($invite)
         ->set('amount_to_invest', 1000000)
+        ->set('lga_name', 'Ikeja')
         ->call('register')
         ->assertHasNoErrors()
         ->assertSee('Registration Successful');
@@ -54,20 +83,62 @@ test('a guest can register themselves as a client', function () {
         ->and($client->client_id)->toBe('YFC-0001')
         ->and($client->created_by)->toBeNull()
         ->and($client->status)->toBe('pending')
-        ->and($client->full_name)->toBe('Jane Obi Doe');
+        ->and($client->full_name)->toBe('Jane Obi Doe')
+        ->and($client->lga_name)->toBe('Ikeja');
 
     Notification::assertSentTo($user, ClientRegisteredNotification::class);
+
+    $invite->refresh();
+
+    expect($invite->isUsed())->toBeTrue();
+});
+
+test('a share link cannot be used to register more than once', function () {
+    Notification::fake();
+    $invite = registrationInvite();
+
+    guestRegistrationComponent($invite)->call('register')->assertHasNoErrors();
+
+    guestRegistrationComponent($invite)
+        ->set('email', 'other@example.com')
+        ->call('register')
+        ->assertHasErrors(['token']);
+
+    expect(Client::where('email', 'other@example.com')->exists())->toBeFalse();
+});
+
+test('an expired share link cannot be used to register', function () {
+    Notification::fake();
+    $invite = registrationInvite(['expires_at' => now()->subHour()]);
+
+    guestRegistrationComponent($invite)
+        ->call('register')
+        ->assertHasErrors(['token']);
+
+    expect(Client::where('email', 'jane.doe@example.com')->exists())->toBeFalse();
+});
+
+test('a used share link shows an unavailable notice when visited', function () {
+    $invite = registrationInvite(['used_at' => now()]);
+
+    $this->get("/client/register/{$invite->token}")
+        ->assertOk()
+        ->assertSee('Link Unavailable');
+});
+
+test('an expired share link shows an unavailable notice when visited', function () {
+    $invite = registrationInvite(['expires_at' => now()->subDay()]);
+
+    $this->get("/client/register/{$invite->token}")
+        ->assertOk()
+        ->assertSee('Link Unavailable');
 });
 
 test('a guest registration stores next of kin details', function () {
-    Livewire::test('pages.auth.client-register')
-        ->set('surname', 'Doe')
-        ->set('first_name', 'Jane')
-        ->set('middle_name', 'Obi')
-        ->set('sex', 'Female')
-        ->set('date_of_birth', '1992-05-10')
-        ->set('mobile_number', '08011112222')
-        ->set('email', 'jane.doe@example.com')
+    Notification::fake();
+    $invite = registrationInvite();
+
+    guestRegistrationComponent($invite)
         ->set('next_of_kin.name', 'Mary Doe')
         ->set('next_of_kin.phone', '08099998888')
         ->set('next_of_kin.relationship', 'Sibling')
@@ -82,32 +153,56 @@ test('a guest registration stores next of kin details', function () {
 });
 
 test('guest registration requires a unique email', function () {
+    Notification::fake();
     Client::factory()->create(['email' => 'taken@example.com']);
+    $invite = registrationInvite();
 
-    Livewire::test('pages.auth.client-register')
-        ->set('surname', 'Doe')
-        ->set('first_name', 'Jane')
-        ->set('middle_name', 'Obi')
-        ->set('sex', 'Female')
-        ->set('date_of_birth', '1992-05-10')
-        ->set('mobile_number', '08011112222')
+    guestRegistrationComponent($invite)
         ->set('email', 'taken@example.com')
         ->call('register')
         ->assertHasErrors(['email']);
 });
 
 test('guest registration validates required and format rules', function () {
-    Livewire::test('pages.auth.client-register')
+    Notification::fake();
+    $invite = registrationInvite();
+
+    Livewire::test('pages.auth.client-register', ['token' => $invite->token])
         ->set('surname', '')
         ->set('mobile_number', '12345')
         ->set('email', 'not-an-email')
         ->call('register')
-        ->assertHasErrors(['surname', 'first_name', 'middle_name', 'sex', 'date_of_birth', 'mobile_number', 'email']);
+        ->assertHasErrors(['surname', 'first_name', 'sex', 'date_of_birth', 'mobile_number', 'email']);
 });
 
-test('admin and staff can see the share registration link on the clients page', function () {
+test('generating a share link creates a single-use invite valid for one day', function () {
+    $this->actingAs(adminUser());
+
+    Livewire::test(ClientIndex::class)
+        ->call('generateShareLink');
+
+    $invite = ClientRegistrationInvite::sole();
+
+    expect($invite->created_by)->toBe(auth()->id())
+        ->and($invite->isActive())->toBeTrue()
+        ->and($invite->expires_at->format('Y-m-d H:i'))->toBe(now()->addDay()->format('Y-m-d H:i'));
+});
+
+test('admin and staff can see the share registration link button on the clients page', function () {
     $this->actingAs(adminUser())->get('/clients')->assertOk()->assertSee('Share Link');
     $this->actingAs(staffUser())->get('/clients')->assertOk()->assertSee('Share Link');
+});
+
+test('a user without create clients permission cannot generate a share link', function () {
+    seedRoles();
+
+    $this->actingAs(User::factory()->create());
+
+    Livewire::test(ClientIndex::class)
+        ->call('generateShareLink')
+        ->assertForbidden();
+
+    expect(ClientRegistrationInvite::count())->toBe(0);
 });
 
 test('admin can approve a pending client registration', function () {

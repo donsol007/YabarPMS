@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Setting;
+use Illuminate\Support\Carbon;
 
 if (! function_exists('setting')) {
     function setting(string $key, mixed $default = null): mixed
@@ -24,14 +25,14 @@ if (! function_exists('format_money')) {
 }
 
 if (! function_exists('format_date')) {
-    function format_date(string|\DateTimeInterface|null $date): string
+    function format_date(string|DateTimeInterface|null $date): string
     {
         if ($date === null) {
             return '—';
         }
 
         if (is_string($date)) {
-            $date = \Illuminate\Support\Carbon::parse($date);
+            $date = Carbon::parse($date);
         }
 
         return $date->format('d/m/Y');
@@ -39,16 +40,27 @@ if (! function_exists('format_date')) {
 }
 
 if (! function_exists('format_datetime')) {
-    function format_datetime(string|\DateTimeInterface|null $date): string
+    function format_datetime(string|DateTimeInterface|null $date): string
     {
         if ($date === null) {
             return '—';
         }
 
         if (is_string($date)) {
-            $date = \Illuminate\Support\Carbon::parse($date);
+            $date = Carbon::parse($date);
         }
 
         return $date->format('d/m/Y H:i');
+    }
+}
+
+if (! function_exists('report_logo_path')) {
+    function report_logo_path(): ?string
+    {
+        $logo = setting('report_logo') ?: setting('company_logo');
+
+        return $logo && file_exists(storage_path('app/public/'.$logo))
+            ? storage_path('app/public/'.$logo)
+            : null;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ClientPortfolioAccessController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\ReportController;
@@ -12,9 +13,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::get('dashboard', DashboardController::class)->name('dashboard.index');
 
-    Route::resource('clients', ClientController::class)->except(['show']);
+    Route::resource('clients', ClientController::class);
     Route::post('clients/{client}/approve', [ClientController::class, 'approve'])
         ->name('clients.approve');
+
+    Route::post('clients/{client}/portfolio-access/regenerate', [ClientController::class, 'regeneratePortfolioAccess'])
+        ->name('clients.portfolio-access.regenerate');
+    Route::post('clients/{client}/portfolio-access/email', [ClientController::class, 'emailPortfolioAccess'])
+        ->name('clients.portfolio-access.email');
 
     Route::middleware('role:admin')->group(function () {
         Route::delete('clients/{client}/documents/{document}', [ClientController::class, 'destroyDocument'])
@@ -54,5 +60,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
+
+Route::prefix('portfolio-access')->name('portfolio.access.')->group(function () {
+    Route::get('{token}', [ClientPortfolioAccessController::class, 'show'])
+        ->name('show');
+    Route::post('{token}', [ClientPortfolioAccessController::class, 'unlock'])
+        ->middleware('throttle:10,1')
+        ->name('unlock');
+    Route::get('{token}/view', [ClientPortfolioAccessController::class, 'view'])
+        ->name('view');
+    Route::get('{token}/pdf', [ClientPortfolioAccessController::class, 'pdf'])
+        ->name('pdf');
+    Route::post('{token}/lock', [ClientPortfolioAccessController::class, 'lock'])
+        ->name('lock');
+});
 
 require __DIR__.'/auth.php';

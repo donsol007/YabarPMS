@@ -1,15 +1,13 @@
 <?php
 
-use App\Models\Bank;
 use App\Models\Client;
-use App\Models\Lga;
 use App\Models\State;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 function validClientPayload(array $overrides = []): array
 {
     $state = State::factory()->create();
-    $lga = Lga::factory()->create(['state_id' => $state->id]);
-    $bank = Bank::factory()->create();
 
     return array_merge([
         'surname' => 'Doe',
@@ -21,12 +19,12 @@ function validClientPayload(array $overrides = []): array
         'mother_maiden_name' => 'Okafor',
         'residential_address' => '12 Marina, Lagos',
         'state_of_origin_id' => $state->id,
-        'lga_id' => $lga->id,
+        'lga_name' => 'Ikeja',
         'marital_status' => 'Married',
         'religion' => 'Christianity',
         'email' => 'john.doe@example.com',
         'amount_to_invest' => 2500000,
-        'bank_id' => $bank->id,
+        'bank_name' => 'Guaranty Trust Bank',
         'account_name' => 'John Obi Doe',
         'account_number' => '0123456789',
         'account_type' => 'Savings',
@@ -62,6 +60,62 @@ test('admin can register a client with next of kin and documents', function () {
         ->and($client->nextOfKin)->not->toBeNull()
         ->and($client->nextOfKin->name)->toBe('Mary Doe')
         ->and($client->created_by)->toBe($user->id);
+});
+
+test('client documents are uploaded and stored', function () {
+    Storage::fake('public');
+    $user = adminUser();
+
+    $this->actingAs($user)
+        ->post('/clients', validClientPayload([
+            'documents' => [
+                'id_card' => UploadedFile::fake()->image('id.jpg'),
+                'utility_bill' => UploadedFile::fake()->create('bill.pdf', 100, 'application/pdf'),
+                'signature' => UploadedFile::fake()->image('signature.png'),
+            ],
+        ]))
+        ->assertSessionHasNoErrors()
+        ->assertRedirect();
+
+    $client = Client::where('email', 'john.doe@example.com')->first();
+
+    expect($client->documents)->toHaveCount(3);
+
+    foreach (['id_card', 'utility_bill', 'signature'] as $type) {
+        $document = $client->documents->firstWhere('type', $type);
+
+        expect($document)->not->toBeNull()
+            ->and(Storage::disk('public')->exists($document->stored_path))->toBeTrue();
+    }
+});
+
+test('admin can register a client with a blank amount to invest', function () {
+    $user = adminUser();
+    $payload = validClientPayload();
+    unset($payload['amount_to_invest']);
+
+    $this->actingAs($user)
+        ->post('/clients', $payload)
+        ->assertSessionHasNoErrors()
+        ->assertRedirect();
+
+    $client = Client::where('email', 'john.doe@example.com')->first();
+
+    expect($client)->not->toBeNull()
+        ->and((float) $client->amount_to_invest)->toBe(0.0);
+});
+
+test('staff can register a client with a blank amount to invest', function () {
+    $user = staffUser();
+    $payload = validClientPayload();
+    unset($payload['amount_to_invest']);
+
+    $this->actingAs($user)
+        ->post('/clients', $payload)
+        ->assertSessionHasNoErrors()
+        ->assertRedirect();
+
+    expect(Client::where('email', 'john.doe@example.com')->exists())->toBeTrue();
 });
 
 test('client id increments sequentially', function () {

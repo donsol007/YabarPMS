@@ -21,7 +21,7 @@ class ReportService
         $pdf = Pdf::loadView('reports.pdf.portfolio', [
             'portfolio' => $portfolio,
             'company' => setting('company_name', 'Yabar Finance Consult Limited'),
-            'company_logo' => $this->companyLogoPath(),
+            'company_logo' => report_logo_path(),
         ]);
 
         return $pdf->setPaper('a4', 'portrait');
@@ -38,18 +38,9 @@ class ReportService
             'clients' => $clients,
             'fields' => $fields,
             'company' => setting('company_name', 'Yabar Finance Consult Limited'),
-            'company_logo' => $this->companyLogoPath(),
+            'company_logo' => report_logo_path(),
         ]);
 
         return $pdf->setPaper('a4', 'landscape');
-    }
-
-    private function companyLogoPath(): ?string
-    {
-        $logo = setting('company_logo');
-
-        return $logo && file_exists(storage_path('app/public/'.$logo))
-            ? storage_path('app/public/'.$logo)
-            : null;
     }
 }

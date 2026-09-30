@@ -1,16 +1,19 @@
 <?php
 
-use App\Models\Bank;
 use App\Models\Client;
+use App\Models\ClientRegistrationInvite;
 use App\Models\State;
 use App\Models\User;
 use App\Notifications\ClientRegisteredNotification;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
 new #[Layout('layouts.register')] class extends Component
 {
+    public string $token = '';
     public $surname = '';
     public $first_name = '';
     public $middle_name = '';
@@ -20,13 +23,13 @@ new #[Layout('layouts.register')] class extends Component
     public $mother_maiden_name = '';
     public $residential_address = '';
     public $state_of_origin_id = null;
-    public $lga_id = null;
+    public $lga_name = '';
     public $marital_status = '';
     public $religion = '';
     public $email = '';
     public $amount_to_invest = null;
 
-    public $bank_id = null;
+    public $bank_name = null;
     public $account_name = '';
     public $account_number = '';
     public $account_type = '';
@@ -50,25 +53,36 @@ new #[Layout('layouts.register')] class extends Component
     public bool $registered = false;
     public string $registeredId = '';
 
+    public function mount(string $token): void
+    {
+        $this->token = $token;
+    }
+
+    #[Computed]
+    public function invite(): ?ClientRegistrationInvite
+    {
+        return ClientRegistrationInvite::query()->where('token', $this->token)->first();
+    }
+
     public function rules(): array
     {
         return [
             'surname' => ['required', 'string', 'max:191'],
             'first_name' => ['required', 'string', 'max:191'],
-            'middle_name' => ['required', 'string', 'max:191'],
+            'middle_name' => ['nullable', 'string', 'max:191'],
             'sex' => ['required', 'in:Male,Female'],
             'date_of_birth' => ['required', 'date', 'before:today'],
             'mobile_number' => ['required', 'string', 'max:20', 'regex:/^0[0-9]{10}$/'],
             'mother_maiden_name' => ['nullable', 'string', 'max:191'],
             'residential_address' => ['nullable', 'string'],
             'state_of_origin_id' => ['nullable', 'exists:states,id'],
-            'lga_id' => ['nullable', 'exists:lgas,id'],
+            'lga_name' => ['nullable', 'string', 'max:191'],
             'marital_status' => ['nullable', 'in:Single,Married,Divorced,Widowed'],
             'religion' => ['nullable', 'in:Christianity,Islam,Traditional,Other'],
             'email' => ['required', 'email', 'max:191', 'unique:clients,email'],
             'amount_to_invest' => ['nullable', 'numeric', 'min:0', 'max:99999999999999'],
 
-            'bank_id' => ['nullable', 'exists:banks,id'],
+            'bank_name' => ['nullable', 'string', 'max:191'],
             'account_name' => ['nullable', 'string', 'max:191'],
             'account_number' => ['nullable', 'string', 'digits:10'],
             'account_type' => ['nullable', 'in:Savings,Current,Domiciliary'],
@@ -100,6 +114,14 @@ new #[Layout('layouts.register')] class extends Component
 
     public function register(): void
     {
+        $invite = $this->invite;
+
+        if (! $invite?->isActive()) {
+            throw ValidationException::withMessages([
+                'token' => __('This registration link is invalid, has expired, or has already been used.'),
+            ]);
+        }
+
         $data = $this->validate();
 
         $data = array_map(fn ($value) => $value === '' ? null : $value, $data);
@@ -117,6 +139,8 @@ new #[Layout('layouts.register')] class extends Component
 
         Notification::send(User::all(), new ClientRegisteredNotification($client));
 
+        $invite->update(['used_at' => now()]);
+
         $this->registered = true;
         $this->registeredId = $client->client_id;
     }
@@ -125,7 +149,7 @@ new #[Layout('layouts.register')] class extends Component
     {
         return [
             'states' => State::with('lgas')->orderBy('name')->get(),
-            'banks' => Bank::orderBy('name')->get(),
+            'invite' => $this->invite,
         ];
     }
 }; ?>
@@ -145,6 +169,17 @@ new #[Layout('layouts.register')] class extends Component
             </p>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Our team will be in touch shortly to complete your investment setup.</p>
         </div>
+    @elseif (! $invite?->isActive())
+        <div class="py-8 text-center">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40">
+                <svg class="h-8 w-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </div>
+            <h2 class="mt-4 text-lg font-bold text-slate-900 dark:text-white">Link Unavailable</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">This registration link is invalid, has expired, or has already been used.</p>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Please request a new registration link to continue.</p>
+        </div>
     @else
         <div class="mb-6 text-center">
             <h2 class="text-lg font-bold text-slate-900 dark:text-white">Register as a Client</h2>
@@ -152,7 +187,8 @@ new #[Layout('layouts.register')] class extends Component
         </div>
 
         <form wire:submit="register" x-data="{ submitted: false }" class="space-y-6">
-            {{-- Personal Information --}}
+            <x-input-error :messages="$errors->get('token')" class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400" />
+ {{-- Personal Information --}}
             <section>
                 <h3 class="label">Personal Information</h3>
                 <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -168,7 +204,7 @@ new #[Layout('layouts.register')] class extends Component
                     </div>
                     <div>
                         <x-input-label for="middle_name" :value="__('Middle Name')" />
-                        <x-text-input wire:model="middle_name" id="middle_name" class="mt-1 w-full" required />
+                        <x-text-input wire:model="middle_name" id="middle_name" class="mt-1 w-full" />
                         <x-input-error :messages="$errors->get('middle_name')" class="mt-2" />
                     </div>
                     <div>
@@ -206,30 +242,21 @@ new #[Layout('layouts.register')] class extends Component
                         <x-input-error :messages="$errors->get('residential_address')" class="mt-2" />
                     </div>
 
-                    @php($lgasByState = $states->mapWithKeys(fn ($s) => [$s->id => $s->lgas->pluck('name', 'id')->all()])->all())
+                    <div>
+                        <x-input-label for="state_of_origin_id" :value="__('State of Origin')" />
+                        <select wire:model="state_of_origin_id" id="state_of_origin_id" class="input mt-1 w-full">
+                            <option value="">Select state</option>
+                            @foreach ($states as $state)
+                                <option value="{{ $state->id }}">{{ $state->name }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error :messages="$errors->get('state_of_origin_id')" class="mt-2" />
+                    </div>
 
-                    <div class="grid gap-4 sm:col-span-2 sm:grid-cols-2" x-data="lgaDropdown(@js($state_of_origin_id), @js($lga_id), @js($lgasByState))">
-                        <div>
-                            <x-input-label for="state_of_origin_id" :value="__('State of Origin')" />
-                            <select wire:model="state_of_origin_id" id="state_of_origin_id" class="input mt-1 w-full" x-on:change="onStateChange($el.value)">
-                                <option value="">Select state</option>
-                                @foreach ($states as $state)
-                                    <option value="{{ $state->id }}">{{ $state->name }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('state_of_origin_id')" class="mt-2" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="lga_id" :value="__('Local Government Area')" />
-                            <select wire:model="lga_id" id="lga_id" class="input mt-1 w-full">
-                                <option value="">Select LGA</option>
-                                <template x-for="lga in lgas" :key="lga[0]">
-                                    <option :value="lga[0]" :selected="String(lga[0]) === String(@js($lga_id))" x-text="lga[1]"></option>
-                                </template>
-                            </select>
-                            <x-input-error :messages="$errors->get('lga_id')" class="mt-2" />
-                        </div>
+                    <div>
+                        <x-input-label for="lga_name" :value="__('Local Government Area')" />
+                        <x-text-input wire:model="lga_name" id="lga_name" type="text" class="mt-1 w-full" placeholder="Enter your LGA" />
+                        <x-input-error :messages="$errors->get('lga_name')" class="mt-2" />
                     </div>
 
                     <div>
@@ -272,14 +299,9 @@ new #[Layout('layouts.register')] class extends Component
                 <h3 class="label">Banking Information</h3>
                 <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
-                        <x-input-label for="bank_id" :value="__('Bank Name')" />
-                        <select wire:model="bank_id" id="bank_id" class="input mt-1 w-full">
-                            <option value="">Select bank</option>
-                            @foreach ($banks as $bank)
-                                <option value="{{ $bank->id }}">{{ $bank->name }}</option>
-                            @endforeach
-                        </select>
-                        <x-input-error :messages="$errors->get('bank_id')" class="mt-2" />
+                        <x-input-label for="bank_name" :value="__('Bank Name')" />
+                        <x-text-input wire:model="bank_name" id="bank_name" type="text" class="mt-1 w-full" placeholder="Enter your bank" />
+                        <x-input-error :messages="$errors->get('bank_name')" class="mt-2" />
                     </div>
                     <div>
                         <x-input-label for="account_name" :value="__('Account Name')" />

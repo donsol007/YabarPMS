@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller
 {
-    private const BRAND_ASSETS = ['company_logo', 'company_favicon'];
+    private const BRAND_ASSETS = ['company_logo', 'company_favicon', 'report_logo'];
 
     public function index()
     {

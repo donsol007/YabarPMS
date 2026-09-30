@@ -12,19 +12,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Support\LogOptions;
+use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 #[Fillable([
     'client_id', 'surname', 'first_name', 'middle_name', 'sex', 'date_of_birth',
     'mobile_number', 'mother_maiden_name', 'residential_address',
-    'state_of_origin_id', 'lga_id', 'marital_status', 'religion', 'email',
-    'amount_to_invest', 'bank_id', 'account_name', 'account_number',
+    'state_of_origin_id', 'lga_id', 'lga_name', 'marital_status', 'religion', 'email',
+    'amount_to_invest', 'bank_id', 'bank_name', 'account_name', 'account_number',
     'account_type', 'bvn', 'account_opening_date', 'bank_address',
     'occupation', 'employer_name', 'employer_address', 'hobbies', 'created_by',
-    'status',
+    'status', 'portfolio_access_code', 'portfolio_access_token', 'portfolio_access_code_set_at',
 ])]
-#[Hidden(['bvn'])]
+#[Hidden(['bvn', 'portfolio_access_code', 'portfolio_access_token'])]
 class Client extends Model
 {
     public const STATUS_PENDING = 'pending';
@@ -32,7 +33,7 @@ class Client extends Model
     public const STATUS_APPROVED = 'approved';
 
     /** @use HasFactory<ClientFactory> */
-    use HasFactory, SoftDeletes, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     protected function casts(): array
     {
@@ -40,7 +41,32 @@ class Client extends Model
             'date_of_birth' => 'date',
             'account_opening_date' => 'date',
             'amount_to_invest' => 'decimal:2',
+            'portfolio_access_code_set_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Client $client) {
+            if ($client->amount_to_invest === null) {
+                $client->amount_to_invest = 0;
+            }
+
+            if (blank($client->portfolio_access_code)) {
+                $client->portfolio_access_token = null;
+                $client->portfolio_access_code_set_at = null;
+
+                return;
+            }
+
+            if (blank($client->portfolio_access_token)) {
+                $client->portfolio_access_token = Str::random(48);
+            }
+
+            if ($client->isDirty('portfolio_access_code') && filled($client->portfolio_access_code)) {
+                $client->portfolio_access_code_set_at = now();
+            }
+        });
     }
 
     public function getActivitylogOptions(): LogOptions
@@ -147,9 +173,9 @@ class Client extends Model
     public function reportField(string $field): mixed
     {
         return match ($field) {
-            'bank_name' => $this->bank?->name ?? '—',
+            'bank_name' => $this->bank?->name ?? $this->bank_name ?? '—',
             'state' => $this->stateOfOrigin?->name ?? '—',
-            'lga' => $this->lga?->name ?? '—',
+            'lga' => $this->lga?->name ?? $this->lga_name ?? '—',
             'date_of_birth' => format_date($this->date_of_birth),
             'amount_to_invest' => format_money($this->amount_to_invest),
             'bvn' => $this->bvn ?? '—',
@@ -160,6 +186,32 @@ class Client extends Model
     public function getHasPortfolioAttribute(): bool
     {
         return $this->portfolio()->exists();
+    }
+
+    public function hasPortfolioAccess(): bool
+    {
+        return filled($this->portfolio_access_code) && filled($this->portfolio_access_token);
+    }
+
+    public function verifyPortfolioAccessCode(string $code): bool
+    {
+        return $this->hasPortfolioAccess() && hash_equals((string) $this->portfolio_access_code, $code);
+    }
+
+    public function portfolioAccessUrl(): ?string
+    {
+        if (! $this->hasPortfolioAccess()) {
+            return null;
+        }
+
+        return route('portfolio.access.show', $this->portfolio_access_token);
+    }
+
+    public function regeneratePortfolioAccessToken(): void
+    {
+        $this->forceFill([
+            'portfolio_access_token' => $this->hasPortfolioAccess() ? Str::random(48) : null,
+        ])->save();
     }
 
     public static function nextClientId(): string

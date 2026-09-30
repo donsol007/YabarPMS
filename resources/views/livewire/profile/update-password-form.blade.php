@@ -17,6 +17,8 @@ new class extends Component
      */
     public function updatePassword(): void
     {
+        abort_unless(app()->hasDebugModeEnabled(), 403, 'Password changes are only allowed while APP_DEBUG=true.');
+
         try {
             $validated = $this->validate([
                 'current_password' => ['required', 'string', 'current_password'],
@@ -49,6 +51,7 @@ new class extends Component
         </p>
     </header>
 
+    @if (app()->hasDebugModeEnabled())
     <form wire:submit="updatePassword" class="mt-6 space-y-6">
         <div>
             <x-input-label for="update_password_current_password" :value="__('Current Password')" />
@@ -76,4 +79,9 @@ new class extends Component
             </x-action-message>
         </div>
     </form>
+    @else
+    <p class="mt-6 text-sm text-gray-500">
+        {{ __('Change Password is Disabled') }}
+    </p>
+    @endif
 </section>

@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Client;
+use App\Models\ClientRegistrationInvite;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -20,6 +21,19 @@ class ClientIndex extends Component
 
     #[Url(as: 'dir', history: true)]
     public string $sortDirection = 'desc';
+
+    public ?string $shareLink = null;
+
+    public function generateShareLink(): void
+    {
+        $this->authorize('create', Client::class);
+
+        $invite = ClientRegistrationInvite::issue(auth()->id());
+
+        $this->shareLink = route('client.register', ['token' => $invite->token]);
+
+        $this->dispatch('open-modal', 'share-registration-link');
+    }
 
     public function updatedSearch(): void
     {

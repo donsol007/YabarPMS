@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Mail\ClientPortfolioAccessLink;
 use App\Mail\ClientPortfolioReport;
+use App\Models\Client;
 use App\Models\Portfolio;
 use Illuminate\Support\Facades\Mail;
 
@@ -43,6 +45,19 @@ class EmailService
         $pdf = app(ReportService::class)->portfolioPdf($portfolio);
 
         Mail::send(new ClientPortfolioReport($portfolio, $pdf->output()));
+
+        return true;
+    }
+
+    public function sendPortfolioAccessLink(Client $client): bool
+    {
+        if (! $this->isConfigured()) {
+            return false;
+        }
+
+        $this->configure();
+
+        Mail::send(new ClientPortfolioAccessLink($client));
 
         return true;
     }

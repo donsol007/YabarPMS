@@ -102,6 +102,42 @@ test('a non-image logo upload is rejected', function () {
         ->assertSessionHasErrors('company_logo');
 });
 
+test('admin can upload a report logo', function () {
+    $user = adminUser();
+
+    Storage::fake('public');
+
+    $this->actingAs($user)
+        ->put('/settings', [
+            'company_name' => 'Yabar Finance Consult Limited',
+            'currency_symbol' => '₦',
+            'due_notice_days' => 7,
+            'upload_max_size' => 5,
+            'report_logo' => UploadedFile::fake()->image('report-logo.png', 256, 256),
+        ])
+        ->assertRedirect();
+
+    $path = setting('report_logo');
+
+    expect($path)->not->toBeNull()
+        ->and(Storage::disk('public')->exists($path))->toBeTrue();
+});
+
+test('settings page shows the report logo upload', function () {
+    $user = adminUser();
+
+    Storage::fake('public');
+
+    Setting::set('report_logo', 'branding/report.png');
+    Storage::disk('public')->put('branding/report.png', 'logo');
+
+    $this->actingAs($user)
+        ->get('/settings')
+        ->assertOk()
+        ->assertSee('Report Logo')
+        ->assertSee('report.png');
+});
+
 test('setting default is returned when unset', function () {
     Setting::forget('missing_key');
 

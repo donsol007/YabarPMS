@@ -7,29 +7,29 @@
 
 <div>
     <div class="card">
-        <div class="card-header">
-            <div>
+        <div class="card-header flex-wrap gap-3">
+            <div class="min-w-0">
                 <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">All clients</h3>
                 <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ $clients->total() }} registered clients</p>
             </div>
-            <div class="flex items-center gap-2">
-                <div class="relative">
+            <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+                <div class="relative w-full sm:w-56">
                     <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input type="text"
                            wire:model.live.debounce.300ms="search"
                            placeholder="Search clients…"
-                           class="w-56 rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 pl-9 pr-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500" />
+                           class="w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 pl-9 pr-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500" />
                 </div>
                 @can('create clients')
-                    <button type="button" @click="$dispatch('open-modal', 'share-registration-link')" class="btn-secondary">
+                    <button type="button" wire:click="generateShareLink" class="btn-secondary flex-1 sm:flex-none">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 015.656 0l2.172 2.172a4 4 0 010 5.657l-1.086 1.086a4 4 0 01-5.656 0M10.172 13.828a4 4 0 01-5.656 0l-2.172-2.172a4 4 0 010-5.657l1.086-1.086a4 4 0 015.656 0M8 8l8 8" />
                         </svg>
                         Share Link
                     </button>
-                    <a href="{{ route('clients.create') }}" class="btn-primary" wire:navigate>
+                    <a href="{{ route('clients.create') }}" class="btn-primary flex-1 sm:flex-none" wire:navigate>
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
@@ -39,7 +39,7 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="table-scroll">
             @if ($clients->isEmpty())
                 <div class="p-6">
                     <x-empty-state
@@ -96,6 +96,7 @@
                                                     wire:click="approve({{ $client->id }})"
                                                     class="btn-ghost btn-sm text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">Approve</button>
                                         @endif
+                                        <a href="{{ route('clients.show', $client) }}" wire:navigate class="btn-ghost btn-sm">View</a>
                                         <a href="{{ route('clients.edit', $client) }}" wire:navigate class="btn-ghost btn-sm">Edit</a>
                                         @can('delete clients')
                                             <x-confirm-dialog
@@ -127,8 +128,9 @@
             <div class="p-6">
                 <h2 class="text-lg font-medium text-slate-900 dark:text-slate-100">Share Registration Link</h2>
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Share this link with a prospective client. They can fill in their details themselves and the record will appear in your client list.</p>
+                <p class="mt-1 text-xs text-amber-600 dark:text-amber-400">This link is single-use and expires after 24 hours.</p>
                 <div class="mt-4 flex items-center gap-2" x-data="{ copied: false, copyLink() { const el = $refs.link; el.select(); el.setSelectionRange(0, 99999); navigator.clipboard?.writeText(el.value).catch(() => document.execCommand('copy')); copied = true; setTimeout(() => copied = false, 2000); } }">
-                    <input type="text" readonly x-ref="link" :value="@js(route('client.register'))" class="input w-full" @click="copyLink()" />
+                    <input type="text" readonly x-ref="link" value="{{ $shareLink }}" class="input w-full" @click="copyLink()" />
                     <button type="button" class="btn-primary shrink-0" @click="copyLink()">
                         <span x-text="copied ? 'Copied!' : 'Copy'"></span>
                     </button>

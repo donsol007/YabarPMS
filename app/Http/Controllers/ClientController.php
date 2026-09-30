@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ClientRequest;
-use App\Models\Bank;
 use App\Models\Client;
 use App\Models\Document;
-use App\Notifications\ClientRegisteredNotification;
 use App\Models\State;
 use App\Models\User;
+use App\Notifications\ClientRegisteredNotification;
+use App\Services\EmailService;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,6 +23,17 @@ class ClientController extends Controller
         return view('clients.index');
     }
 
+    public function show(Client $client)
+    {
+        $this->authorize('view', $client);
+
+        $client->load(['nextOfKin', 'documents', 'stateOfOrigin', 'lga', 'bank', 'portfolio', 'creator']);
+
+        return view('clients.show', [
+            'client' => $client,
+        ]);
+    }
+
     public function create()
     {
         $this->authorize('create', Client::class);
@@ -29,7 +41,6 @@ class ClientController extends Controller
         return view('clients.create', [
             'client' => new Client,
             'states' => State::with('lgas')->orderBy('name')->get(),
-            'banks' => Bank::orderBy('name')->get(),
         ]);
     }
 
@@ -62,7 +73,6 @@ class ClientController extends Controller
         return view('clients.edit', [
             'client' => $client,
             'states' => State::with('lgas')->orderBy('name')->get(),
-            'banks' => Bank::orderBy('name')->get(),
         ]);
     }
 
@@ -118,6 +128,77 @@ class ClientController extends Controller
         return Storage::disk('public')->download($document->stored_path, $document->original_name);
     }
 
+    public function regeneratePortfolioAccess(Client $client)
+    {
+        $this->authorize('update', $client);
+
+        if (! $client->hasPortfolioAccess()) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Set an access code before generating the portfolio link.',
+            ]);
+        }
+
+        $client->regeneratePortfolioAccessToken();
+
+        activity()
+            ->performedOn($client)
+            ->causedBy(request()->user())
+            ->log('regenerated portfolio access link');
+
+        return back()->with('toast', [
+            'type' => 'success',
+            'message' => 'A new portfolio link has been generated. The previous link no longer works.',
+        ]);
+    }
+
+    public function emailPortfolioAccess(Client $client, EmailService $email)
+    {
+        $this->authorize('update', $client);
+
+        if (! $client->hasPortfolioAccess()) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Set an access code before emailing the portfolio link.',
+            ]);
+        }
+
+        if (! $client->email) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'This client has no email address on file.',
+            ]);
+        }
+
+        try {
+            $sent = $email->sendPortfolioAccessLink($client);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Failed to send the email: '.$e->getMessage(),
+            ]);
+        }
+
+        if (! $sent) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Email settings are not configured. Set them up under Email Settings first.',
+            ]);
+        }
+
+        activity()
+            ->performedOn($client)
+            ->causedBy(request()->user())
+            ->log('emailed portfolio access link to '.$client->email);
+
+        return back()->with('toast', [
+            'type' => 'success',
+            'message' => 'Portfolio link emailed to '.$client->email.'.',
+        ]);
+    }
+
     public function destroyDocument(Client $client, Document $document)
     {
         abort_unless($document->client_id === $client->id, 404);
@@ -133,13 +214,15 @@ class ClientController extends Controller
     protected function storeDocuments(Request $request, Client $client): void
     {
         $maxSizeMb = (int) setting('upload_max_size', 5);
+        $maxSizeKb = $maxSizeMb * 1024;
 
-        $files = collect($request->allFiles())->filter(fn ($file, $key) => str_starts_with($key, 'documents.'));
+        $files = collect($request->file('documents', []))->filter(
+            fn ($file) => $file instanceof UploadedFile
+        );
 
-        foreach ($files as $key => $file) {
-            $type = explode('.', $key)[1];
-            $validated = $request->validate([
-                $key => ['file', 'mimes:pdf,jpg,jpeg,png', "max:{$maxSizeMb}"],
+        foreach ($files as $type => $file) {
+            $request->validate([
+                "documents.{$type}" => ['file', 'mimes:pdf,jpg,jpeg,png', "max:{$maxSizeKb}"],
             ]);
 
             $original = $file->getClientOriginalName();

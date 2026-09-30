@@ -104,7 +104,7 @@
                 <x-empty-state title="No fixed debt instruments" description="Add a fixed debt instrument to this portfolio." />
             </div>
         @else
-            <div class="overflow-x-auto">
+            <div class="table-scroll">
                 <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
                     <thead class="bg-slate-50 dark:bg-slate-800/60">
                         <tr>
@@ -171,7 +171,7 @@
                 <x-empty-state title="No payment history" description="Records of payments made will appear here." />
             </div>
         @else
-            <div class="overflow-x-auto">
+            <div class="table-scroll">
                 <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
                     <thead class="bg-slate-50 dark:bg-slate-800/60">
                         <tr>
@@ -235,7 +235,7 @@
                 <x-empty-state title="No equity holdings" description="Equity positions will appear here." />
             </div>
         @else
-            <div class="overflow-x-auto">
+            <div class="table-scroll">
                 <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
                     <thead class="bg-slate-50 dark:bg-slate-800/60">
                         <tr>
@@ -380,7 +380,7 @@
                             No payment breakdowns for this instrument yet.
                         </p>
                     @else
-                        <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="table-scroll rounded-lg border border-slate-200 dark:border-slate-700">
                             <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
                                 <thead class="bg-slate-50 dark:bg-slate-800/60">
                                     <tr>

@@ -7,23 +7,23 @@
 
 <div>
     <div class="card">
-        <div class="card-header">
-            <div>
+        <div class="card-header flex-wrap gap-3">
+            <div class="min-w-0">
                 <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">All client portfolios</h3>
                 <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ $portfolios->total() }} portfolios</p>
             </div>
-            <div class="flex items-center gap-2">
-                <div class="relative">
+            <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+                <div class="relative w-full sm:w-56">
                     <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input type="text"
                            wire:model.live.debounce.300ms="search"
                            placeholder="Search portfolios…"
-                           class="w-56 rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 pl-9 pr-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500" />
+                           class="w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 pl-9 pr-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500" />
                 </div>
                 @can('create portfolios')
-                    <a href="{{ route('portfolios.create') }}" class="btn-primary" wire:navigate>
+                    <a href="{{ route('portfolios.create') }}" class="btn-primary flex-1 sm:flex-none" wire:navigate>
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="table-scroll">
             @if ($portfolios->isEmpty())
                 <div class="p-6">
                     <x-empty-state

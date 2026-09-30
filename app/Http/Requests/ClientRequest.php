@@ -18,20 +18,20 @@ class ClientRequest extends FormRequest
         return [
             'surname' => ['required', 'string', 'max:191'],
             'first_name' => ['required', 'string', 'max:191'],
-            'middle_name' => ['required', 'string', 'max:191'],
+            'middle_name' => ['nullable', 'string', 'max:191'],
             'sex' => ['required', 'in:Male,Female'],
             'date_of_birth' => ['required', 'date', 'before:today'],
             'mobile_number' => ['required', 'string', 'max:20', 'regex:/^0[0-9]{10}$/'],
             'mother_maiden_name' => ['nullable', 'string', 'max:191'],
             'residential_address' => ['nullable', 'string'],
             'state_of_origin_id' => ['nullable', 'exists:states,id'],
-            'lga_id' => ['nullable', 'exists:lgas,id'],
+            'lga_name' => ['nullable', 'string', 'max:191'],
             'marital_status' => ['nullable', 'in:Single,Married,Divorced,Widowed'],
             'religion' => ['nullable', 'in:Christianity,Islam,Traditional,Other'],
             'email' => ['required', 'email', 'max:191', 'unique:clients,email,'.($clientId ?? 'NULL')],
             'amount_to_invest' => ['nullable', 'numeric', 'min:0', 'max:99999999999999'],
 
-            'bank_id' => ['nullable', 'exists:banks,id'],
+            'bank_name' => ['nullable', 'string', 'max:191'],
             'account_name' => ['nullable', 'string', 'max:191'],
             'account_number' => ['nullable', 'string', 'digits:10'],
             'account_type' => ['nullable', 'in:Savings,Current,Domiciliary'],
@@ -43,6 +43,8 @@ class ClientRequest extends FormRequest
             'employer_name' => ['nullable', 'string', 'max:191'],
             'employer_address' => ['nullable', 'string'],
             'hobbies' => ['nullable', 'string'],
+
+            'portfolio_access_code' => ['nullable', 'string', 'min:4', 'max:20'],
 
             'next_of_kin.name' => ['nullable', 'string', 'max:191'],
             'next_of_kin.address' => ['nullable', 'string'],

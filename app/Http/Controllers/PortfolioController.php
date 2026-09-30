@@ -122,6 +122,7 @@ class PortfolioController extends Controller
             'portfolio' => $portfolio,
             'instrument' => $instrument,
             'company' => setting('company_name', 'Yabar Finance Consult Limited'),
+            'report_logo' => report_logo_path(),
         ]);
     }
 
@@ -132,16 +133,11 @@ class PortfolioController extends Controller
 
         $instrument->load(['detail', 'paymentBreakdowns', 'portfolio.client']);
 
-        $logo = setting('company_logo');
-        $companyLogo = $logo && file_exists(storage_path('app/public/'.$logo))
-            ? storage_path('app/public/'.$logo)
-            : null;
-
         $pdf = Pdf::loadView('reports.pdf.instrument', [
             'portfolio' => $portfolio,
             'instrument' => $instrument,
             'company' => setting('company_name', 'Yabar Finance Consult Limited'),
-            'company_logo' => $companyLogo,
+            'company_logo' => report_logo_path(),
         ]);
 
         return $pdf->download('instrument-'.str($instrument->id).'.pdf');

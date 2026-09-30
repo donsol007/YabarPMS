@@ -68,3 +68,9 @@ test('client report field helper resolves relations', function () {
         ->and($client->reportField('bank_name'))->toBe($client->bank?->name)
         ->and($client->reportField('missing_field'))->toBe('—');
 });
+
+test('client report falls back to typed bank name when no bank is linked', function () {
+    $client = Client::factory()->create(['bank_id' => null, 'bank_name' => 'Zenith Bank']);
+
+    expect($client->reportField('bank_name'))->toBe('Zenith Bank');
+});

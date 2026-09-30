@@ -20,6 +20,7 @@ class SettingsRequest extends FormRequest
             'upload_max_size' => ['required', 'integer', 'min:1', 'max:50'],
             'company_logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,svg,webp', 'max:2048'],
             'company_favicon' => ['nullable', 'image', 'mimes:png,ico,svg', 'max:512'],
+            'report_logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,svg,webp', 'max:2048'],
         ];
     }
 }
